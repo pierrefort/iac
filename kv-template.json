@@ -1,0 +1,332 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "tenantid": {
+            "type": "string",
+            "metadata": {
+                "description": "TenantId of the Resource"}
+            },
+         "adfobjectid": {
+            "type": "string",
+            "metadata": {
+                "description": "ObjectId of the ADF Resource"}
+            },
+        "pfoobjectid": {
+            "type": "string",
+            "metadata": {
+                "description": "ObjectId of the ADF Resource"}
+            },
+        "kvSqlSecretAdmLogName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of the SQL Adm Name secret to be stored in Key Vault."
+                }
+            },
+        "kvSqlSecretAdmLogValue": {
+            "type": "securestring",
+            "metadata": {
+              "description": "Value of the SQL Adm Name secret to be stored in Key Vault."
+            }
+        },
+        "kvSqlSecretAdmPwdName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of the SQL Adm Pwd secret to be stored in Key Vault."
+            }
+        },
+        "kvSqlSecretAdmPwdValue": {
+            "type": "securestring",
+            "metadata": {
+              "description": "Value of the SQL Adm Pwd secret to be stored in Key Vault."
+            }
+        },
+        "kvVmSecretAdmLogName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of the VM Adm Name secret to be stored in Key Vault."
+                }
+            },
+        "kvVmSecretAdmLogValue": {
+            "type": "securestring",
+            "metadata": {
+              "description": "Value of the VM Adm Name secret to be stored in Key Vault."
+            }
+        },
+        "kvVmSecretAdmPwdName": {
+            "type": "string",
+            "metadata": {
+              "description": "Name of the VM Adm Pwd secret to be stored in Key Vault."
+            }
+        },
+        "kvVmSecretAdmPwdValue": {
+            "type": "securestring",
+            "metadata": {
+              "description": "Value of the VM Adm Pwd secret to be stored in Key Vault."
+            }
+        },
+        "keyValueSecretContentType": {
+            "type": "string",
+            "metadata": {
+              "description": "Content type of the secret to be stored in Key Vault."
+            },
+            "defaultValue": "text/plain"
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location of the Resource"}
+            },
+        "contact": {
+            "type": "string",
+            "metadata": {
+                "description": "contact"}
+        },
+        "service": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Service"}
+        },
+        "deploy": {
+            "type": "string",
+            "metadata": {
+                "description": "Type of the Service Deployment"}
+        },
+        "status": {
+            "type": "string",
+            "metadata": {
+                "description": "Project Status"}
+        },
+        "cost": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Cost Center"}
+        },
+        "project": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Project"}
+        },
+        "environment": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Environment"}
+        },
+        "keyVaultEnabledForDeployment": {
+            "type": "bool",
+            "metadata": {
+                "description": "Value indicating whether to enable Key Vault for VM deployment or not."
+            },
+            "defaultValue": false
+        },
+        "keyVaultEnabledForDiskEncryption": {
+            "type": "bool",
+            "metadata": {
+                "description": "Value indicating whether to enable Key Vault for disk encryption or not."
+            },
+            "defaultValue": false
+        },
+        "keyVaultEnabledForTemplateDeployment": {
+            "type": "bool",
+            "metadata": {
+                "description": "Value indicating whether to enable Key Vault for template deployment or not."
+            },
+            "defaultValue": false
+        },
+        "keyVaultEnableRbacAuthorization": {
+            "type": "bool",
+            "metadata": {
+                "description": "Value indicating whether to enable Key Vault rbac authorization or not."
+            },
+            "defaultValue": false
+        },
+        "keyVaultEnableSoftDelete": {
+            "type": "bool",
+            "metadata": {
+                "description": "Value indicating whether to enable Key Vault soft deletion or not."
+            },
+            "defaultValue": true
+        },
+        "keyVaultSoftDeleteRetentionInDays": {
+            "type": "int",
+            "metadata": {
+                "description": "Value indicating the soft delete retention day before automatique purge default - 90 days"
+            },
+            "defaultValue": 90
+        },
+        "kvApiVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "Key Vault API Version"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "name": "[concat(parameters('environment'), '-', parameters('project'), '-kv')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "[parameters('kvApiVersion')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "displayName": "[concat(parameters('environment'), '-', parameters('project'), '-kv')]",
+                "dependsOn": "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('environment'), '-', parameters('project'), '-rg'))]"
+            },
+            "properties": {
+                "enabledForDeployment": "[parameters('keyVaultEnabledForDeployment')]",
+                "enabledForTemplateDeployment": "[parameters('keyVaultEnabledForTemplateDeployment')]",
+                "enabledForDiskEncryption": "[parameters('keyVaultEnabledForDiskEncryption')]",
+                "enableSoftDelete": "[parameters('keyVaultEnableSoftDelete')]",
+                "softDeleteRetentionInDays": "[parameters('keyVaultSoftDeleteRetentionInDays')]",
+                "enableRbacAuthorization": "[parameters('keyVaultEnableRbacAuthorization')]",
+                "tenantId": "[parameters('tenantid')]",
+                "accessPolicies": [
+                    {
+                        "tenantId": "[parameters('tenantid')]",
+                        "objectId": "[parameters('adfobjectid')]",
+                        "permissions": {
+                            "keys": [
+                            ],
+                            "secrets": [
+                                "List",
+                                "Get"
+                            ],
+                            "certificates": [
+                            ]
+                        }
+                    },
+                    {
+                        "tenantId": "[parameters('tenantid')]",
+                        "objectId": "[parameters('pfoobjectid')]",
+                        "permissions": {
+                            "keys": [
+                                    "Get",
+                                    "List",
+                                    "Update",
+                                    "Create",
+                                    "Import",
+                                    "Delete",
+                                    "Recover",
+                                    "Backup",
+                                    "Restore"
+                                ],
+                                "secrets": [
+                                    "Get",
+                                    "List",
+                                    "Set",
+                                    "Delete",
+                                    "Recover",
+                                    "Backup",
+                                    "Restore"
+                                ],
+                                "certificates": [
+                                    "Get",
+                                    "List",
+                                    "Update",
+                                    "Create",
+                                    "Import",
+                                    "Delete",
+                                    "Recover",
+                                    "ManageContacts",
+                                    "ManageIssuers",
+                                    "GetIssuers",
+                                    "ListIssuers",
+                                    "SetIssuers",
+                                    "DeleteIssuers"]
+                        }
+                    }
+                ],
+                "sku": {
+                    "name": "standard",
+                    "family": "A"
+                },
+                "tags": {
+                    "ctc": "[parameters('contact')]",
+                    "service": "[parameters('service')]",
+                    "deploy": "[parameters('deploy')]",
+                    "status": "[parameters('status')]",
+                    "cost": "[parameters('cost')]",
+                    "project": "[parameters('project')]",
+                    "environment": "[parameters('environment')]"
+                }
+            },
+            "resources": [
+                {
+                    "type": "secrets",
+                    "name": "[parameters('kvSqlSecretAdmLogName')]",
+                    "apiVersion": "[parameters('kvApiVersion')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('environment'), '-', parameters('project'), '-kv'))]"
+                    ],
+                    "properties": {
+                        "contentType" : "[parameters('keyValueSecretContentType')]",
+                        "value" : "[parameters('kvSqlSecretAdmLogValue')]"
+                    }
+                },
+                {
+                    "type": "secrets",
+                    "name": "[parameters('kvSqlSecretAdmPwdName')]",
+                    "apiVersion": "[parameters('kvApiVersion')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('environment'), '-', parameters('project'), '-kv'))]"
+                    ],
+                    "properties": {
+                        "contentType" : "[parameters('keyValueSecretContentType')]",
+                        "value" : "[parameters('kvSqlSecretAdmPwdValue')]"
+                    }
+                },
+                {
+                    "type": "secrets",
+                    "name": "[parameters('kvVmSecretAdmLogName')]",
+                    "apiVersion": "[parameters('kvApiVersion')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('environment'), '-', parameters('project'), '-kv'))]"
+                    ],
+                    "properties": {
+                        "contentType" : "[parameters('keyValueSecretContentType')]",
+                        "value" : "[parameters('kvVmSecretAdmLogValue')]"
+                    }
+                },
+                {
+                    "type": "secrets",
+                    "name": "[parameters('kvVmSecretAdmPwdName')]",
+                    "apiVersion": "[parameters('kvApiVersion')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('environment'), '-', parameters('project'), '-kv'))]"
+                    ],
+                    "properties": {
+                        "contentType" : "[parameters('keyValueSecretContentType')]",
+                        "value" : "[parameters('kvVmSecretAdmPwdValue')]"
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {
+        "kv-id": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.KeyVault/vaults',concat(parameters('environment'), '-', parameters('project'), '-kv'))]"
+        },
+        "kv-name": {
+            "type": "string",
+            "value": "[concat(parameters('environment'), '-', parameters('project'), '-kv')]"
+        },
+        "kvscSqlLogName": {
+            "type": "string",
+            "value": "[parameters('kvSqlSecretAdmLogName')]"
+        },
+        "kvscSqlPwdName": {
+            "type": "string",
+            "value": "[parameters('kvSqlSecretAdmPwdName')]"
+        },
+        "kvscVmLogName": {
+            "type": "string",
+            "value": "[parameters('kvVmSecretAdmLogName')]"
+        },
+        "kvscVmPwdName": {
+            "type": "string",
+            "value": "[parameters('kvVmSecretAdmPwdName')]"
+        }
+    }
+}
