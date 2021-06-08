@@ -172,9 +172,6 @@
             "tags": {
                 "displayName": "[concat(parameters('environment'), '-', parameters('project'), '-kv')]"
             },
-            "dependsOn": [
-                "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('environment'), '-', parameters('project'), '-rg'))]"
-            ],
             "properties": {
                 "enabledForDeployment": "[parameters('keyVaultEnabledForDeployment')]",
                 "enabledForTemplateDeployment": "[parameters('keyVaultEnabledForTemplateDeployment')]",
